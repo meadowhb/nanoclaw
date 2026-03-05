@@ -8,7 +8,9 @@ vi.mock('@anthropic-ai/claude-agent-sdk', () => ({
   query: queryMock,
 }));
 
-function makeSessionConfig(overrides: Partial<SessionConfig> = {}): SessionConfig {
+function makeSessionConfig(
+  overrides: Partial<SessionConfig> = {},
+): SessionConfig {
   return {
     leadId: 'engineering-lead',
     prompt: 'Review the API changes',
@@ -24,7 +26,13 @@ function makeSessionConfig(overrides: Partial<SessionConfig> = {}): SessionConfi
   };
 }
 
-function createQuery(messages: unknown[], controls?: { interrupt?: ReturnType<typeof vi.fn>; close?: ReturnType<typeof vi.fn> }): Query {
+function createQuery(
+  messages: unknown[],
+  controls?: {
+    interrupt?: ReturnType<typeof vi.fn>;
+    close?: ReturnType<typeof vi.fn>;
+  },
+): Query {
   const iterator = (async function* () {
     for (const message of messages) {
       yield message;

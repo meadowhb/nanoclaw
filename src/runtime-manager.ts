@@ -77,7 +77,10 @@ function safeNumber(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : 0;
 }
 
-function extractTokens(message: SDKResultMessage): { input: number; output: number } {
+function extractTokens(message: SDKResultMessage): {
+  input: number;
+  output: number;
+} {
   const usage = message.usage as Record<string, unknown> | undefined;
   return {
     input:
@@ -96,7 +99,9 @@ function buildSystemPrompt(config: SessionConfig): string {
   return `${config.systemPrompt}\n\nPreferred skills:\n${skillText}`;
 }
 
-async function* singlePromptStream(prompt: string): AsyncGenerator<SDKUserMessage> {
+async function* singlePromptStream(
+  prompt: string,
+): AsyncGenerator<SDKUserMessage> {
   yield {
     type: 'user',
     message: { role: 'user', content: prompt },
@@ -128,7 +133,10 @@ export class RuntimeManager {
 
     const release = await this.semaphore.acquire();
     const abortController = new AbortController();
-    const timeoutId = setTimeout(() => abortController.abort(), config.timeout * 1000);
+    const timeoutId = setTimeout(
+      () => abortController.abort(),
+      config.timeout * 1000,
+    );
     const sessionKey = `${config.leadId}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
     let activeSession: ActiveSession | null = null;
 
@@ -213,7 +221,10 @@ export class RuntimeManager {
           : error instanceof Error
             ? error.message
             : String(error);
-      logger.warn({ leadId: config.leadId, error: message }, 'Session execution failed');
+      logger.warn(
+        { leadId: config.leadId, error: message },
+        'Session execution failed',
+      );
       return {
         status: 'error',
         result: null,
