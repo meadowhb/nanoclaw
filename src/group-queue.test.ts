@@ -243,6 +243,47 @@ describe('GroupQueue', () => {
     expect(processed).toContain('group3@g.us');
   });
 
+  it('prevents a noisy group from starving waiting groups', async () => {
+    const started: string[] = [];
+    const resolvers = new Map<string, Array<() => void>>();
+
+    const processMessages = vi.fn(async (groupJid: string) => {
+      started.push(groupJid);
+      await new Promise<void>((resolve) => {
+        const list = resolvers.get(groupJid) ?? [];
+        list.push(resolve);
+        resolvers.set(groupJid, list);
+      });
+      return true;
+    });
+
+    queue.setProcessMessagesFn(processMessages);
+
+    // Fill both slots (MAX_CONCURRENT_CONTAINERS = 2)
+    queue.enqueueMessageCheck('groupA@g.us');
+    queue.enqueueMessageCheck('groupC@g.us');
+    await vi.advanceTimersByTimeAsync(10);
+
+    // Queue groupB behind the limit
+    queue.enqueueMessageCheck('groupB@g.us');
+    await vi.advanceTimersByTimeAsync(10);
+
+    // While groupA is running, enqueue more work for groupA (noisy group)
+    queue.enqueueMessageCheck('groupA@g.us');
+
+    // Free up a slot by completing groupA's first run
+    resolvers.get('groupA@g.us')![0]();
+    await vi.advanceTimersByTimeAsync(10);
+
+    // groupB should get the freed slot before groupA runs again
+    expect(started[2]).toBe('groupB@g.us');
+
+    // Cleanup: release any pending runs to avoid dangling promises
+    for (const list of resolvers.values()) {
+      for (const resolve of list) resolve();
+    }
+  });
+
   // --- Running task dedup (Issue #138) ---
 
   it('rejects duplicate enqueue of a currently-running task', async () => {

@@ -288,6 +288,27 @@ export class GroupQueue {
 
     const state = this.getGroup(groupJid);
 
+    const hasPendingWork =
+      state.pendingTasks.length > 0 || state.pendingMessages;
+    const otherGroupsWaiting = this.waitingGroups.some(
+      (jid) => jid !== groupJid,
+    );
+
+    // Fairness: if this group has more pending work but other groups are waiting
+    // for a slot, yield the next slot to the global waiting list first.
+    if (
+      hasPendingWork &&
+      this.waitingGroups.length > 0 &&
+      otherGroupsWaiting &&
+      this.activeCount < MAX_CONCURRENT_CONTAINERS
+    ) {
+      if (!this.waitingGroups.includes(groupJid)) {
+        this.waitingGroups.push(groupJid);
+      }
+      this.drainWaiting();
+      return;
+    }
+
     // Tasks first (they won't be re-discovered from SQLite like messages)
     if (state.pendingTasks.length > 0) {
       const task = state.pendingTasks.shift()!;
