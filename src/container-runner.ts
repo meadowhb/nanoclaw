@@ -25,10 +25,21 @@ import {
 } from './container-runtime.js';
 import { validateAdditionalMounts } from './mount-security.js';
 import { RegisteredGroup } from './types.js';
+import { StreamMarkerParser } from './stream-marker-parser.js';
 
 // Sentinel markers for robust output parsing (must match agent-runner)
 const OUTPUT_START_MARKER = '---NANOCLAW_OUTPUT_START---';
 const OUTPUT_END_MARKER = '---NANOCLAW_OUTPUT_END---';
+
+// Safety: cap streaming parse buffer to avoid unbounded memory growth.
+// This is separate from CONTAINER_MAX_OUTPUT_SIZE (which caps log accumulation).
+const STREAM_PARSE_BUFFER_MAX = Math.max(
+  64 * 1024,
+  parseInt(process.env.CONTAINER_STREAM_PARSE_BUFFER_MAX || '1048576', 10) ||
+    1048576,
+);
+
+const snapshotCache = new Map<string, string>();
 
 export interface ContainerInput {
   prompt: string;
@@ -317,7 +328,11 @@ export async function runContainerAgent(
     delete input.secrets;
 
     // Streaming output: parse OUTPUT_START/END marker pairs as they arrive
-    let parseBuffer = '';
+    const streamParser = new StreamMarkerParser(
+      OUTPUT_START_MARKER,
+      OUTPUT_END_MARKER,
+      STREAM_PARSE_BUFFER_MAX,
+    );
     let newSessionId: string | undefined;
     let outputChain = Promise.resolve();
 
@@ -341,17 +356,8 @@ export async function runContainerAgent(
 
       // Stream-parse for output markers
       if (onOutput) {
-        parseBuffer += chunk;
-        let startIdx: number;
-        while ((startIdx = parseBuffer.indexOf(OUTPUT_START_MARKER)) !== -1) {
-          const endIdx = parseBuffer.indexOf(OUTPUT_END_MARKER, startIdx);
-          if (endIdx === -1) break; // Incomplete pair, wait for more data
-
-          const jsonStr = parseBuffer
-            .slice(startIdx + OUTPUT_START_MARKER.length, endIdx)
-            .trim();
-          parseBuffer = parseBuffer.slice(endIdx + OUTPUT_END_MARKER.length);
-
+        const extracted = streamParser.append(chunk);
+        for (const jsonStr of extracted) {
           try {
             const parsed: ContainerOutput = JSON.parse(jsonStr);
             if (parsed.newSessionId) {
@@ -362,7 +368,14 @@ export async function runContainerAgent(
             resetTimeout();
             // Call onOutput for all markers (including null results)
             // so idle timers start even for "silent" query completions.
-            outputChain = outputChain.then(() => onOutput(parsed));
+            outputChain = outputChain
+              .then(() => onOutput(parsed))
+              .catch((err) => {
+                logger.warn(
+                  { group: group.name, err },
+                  'onOutput rejected; continuing to prevent hang',
+                );
+              });
           } catch (err) {
             logger.warn(
               { group: group.name, error: err },
@@ -660,7 +673,12 @@ export function writeTasksSnapshot(
     : tasks.filter((t) => t.groupFolder === groupFolder);
 
   const tasksFile = path.join(groupIpcDir, 'current_tasks.json');
-  fs.writeFileSync(tasksFile, JSON.stringify(filteredTasks, null, 2));
+  const cacheKey = `tasks:${groupFolder}:${isMain ? 'main' : 'group'}`;
+  const serialized = JSON.stringify(filteredTasks, null, 2);
+  if (snapshotCache.get(cacheKey) !== serialized) {
+    snapshotCache.set(cacheKey, serialized);
+    fs.writeFileSync(tasksFile, serialized);
+  }
 }
 
 export interface AvailableGroup {
@@ -688,15 +706,20 @@ export function writeGroupsSnapshot(
   const visibleGroups = isMain ? groups : [];
 
   const groupsFile = path.join(groupIpcDir, 'available_groups.json');
-  fs.writeFileSync(
-    groupsFile,
-    JSON.stringify(
-      {
-        groups: visibleGroups,
-        lastSync: new Date().toISOString(),
-      },
-      null,
-      2,
-    ),
-  );
+  const cacheKey = `groups:${groupFolder}:${isMain ? 'main' : 'group'}`;
+  const stable = JSON.stringify({ groups: visibleGroups });
+  if (snapshotCache.get(cacheKey) !== stable) {
+    snapshotCache.set(cacheKey, stable);
+    fs.writeFileSync(
+      groupsFile,
+      JSON.stringify(
+        {
+          groups: visibleGroups,
+          lastSync: new Date().toISOString(),
+        },
+        null,
+        2,
+      ),
+    );
+  }
 }

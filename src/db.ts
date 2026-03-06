@@ -82,6 +82,13 @@ function createSchema(database: Database.Database): void {
       container_config TEXT,
       requires_trigger INTEGER DEFAULT 1
     );
+    CREATE TABLE IF NOT EXISTS gateway_threads (
+      thread_jid TEXT PRIMARY KEY,
+      lead_id TEXT NOT NULL,
+      channel_jid TEXT NOT NULL,
+      root_thread_ts TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
   `);
 
   // Add context_mode column if it doesn't exist (migration for existing DBs)
@@ -622,6 +629,54 @@ export function getAllRegisteredGroups(): Record<string, RegisteredGroup> {
     };
   }
   return result;
+}
+
+export interface GatewayThreadRecord {
+  thread_jid: string;
+  lead_id: string;
+  channel_jid: string;
+  root_thread_ts: string;
+  created_at: string;
+}
+
+export function setGatewayThread(
+  threadJid: string,
+  leadId: string,
+  channelJid: string,
+  rootThreadTs: string,
+): void {
+  const now = new Date().toISOString();
+  db.prepare(
+    `
+    INSERT INTO gateway_threads (
+      thread_jid, lead_id, channel_jid, root_thread_ts, created_at
+    ) VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(thread_jid) DO UPDATE SET
+      lead_id = excluded.lead_id,
+      channel_jid = excluded.channel_jid,
+      root_thread_ts = excluded.root_thread_ts
+  `,
+  ).run(threadJid, leadId, channelJid, rootThreadTs, now);
+}
+
+export function getGatewayThread(
+  threadJid: string,
+): GatewayThreadRecord | undefined {
+  return db
+    .prepare(
+      `
+      SELECT
+        thread_jid,
+        lead_id,
+        channel_jid,
+        root_thread_ts,
+        created_at
+      FROM gateway_threads
+      WHERE thread_jid = ?
+      LIMIT 1
+    `,
+    )
+    .get(threadJid) as GatewayThreadRecord | undefined;
 }
 
 // --- JSON migration ---

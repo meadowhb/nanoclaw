@@ -5,7 +5,7 @@
 
 // gmail
 
-// slack
+import './gateway.js';
 
 // telegram
 
