@@ -1,4 +1,5 @@
 import { PRODUCT_LEAD_SUBAGENTS } from './product-lead.js';
+import { MARKETING_LEAD_SUBAGENTS } from './marketing-lead.js';
 import { WorkerIdentitySchema, type WorkerIdentity } from './types.js';
 
 export const WORKER_IDENTITIES: WorkerIdentity[] = [
@@ -179,66 +180,15 @@ export const WORKER_IDENTITIES: WorkerIdentity[] = [
       model,
     }),
   ),
-  {
-    id: 'marketing-audience-researcher',
-    leadId: 'marketing-lead',
-    purpose:
-      'Researches target audiences, objections, and angles that can improve positioning.',
-    capabilities: [
-      'persona-building',
-      'market-scan',
-      'objection-mining',
-      'message-angle-generation',
-    ],
-  },
-  {
-    id: 'marketing-content-brief-writer',
-    leadId: 'marketing-lead',
-    purpose:
-      'Turns strategic direction into structured content briefs and outlines.',
-    capabilities: [
-      'topic-selection',
-      'brief-structuring',
-      'seo-outline-generation',
-      'cta-mapping',
-    ],
-  },
-  {
-    id: 'marketing-campaign-analyst',
-    leadId: 'marketing-lead',
-    purpose:
-      'Analyzes campaign performance and suggests optimizations across channel, funnel, and spend.',
-    capabilities: [
-      'channel-performance-analysis',
-      'creative-signal-detection',
-      'funnel-dropoff-analysis',
-      'budget-recommendation',
-    ],
-  },
-  {
-    id: 'marketing-brand-editor',
-    leadId: 'marketing-lead',
-    purpose:
-      'Edits content and campaign assets for clarity, consistency, and brand safety.',
-    capabilities: [
-      'voice-enforcement',
-      'claim-safety-review',
-      'clarity-editing',
-      'asset-polish',
-    ],
-  },
-  {
-    id: 'marketing-social-listener',
-    leadId: 'marketing-lead',
-    purpose:
-      'Monitors social and community signals to surface trends and draft response options.',
-    capabilities: [
-      'mention-monitoring',
-      'sentiment-tagging',
-      'response-drafting',
-      'trend-spotting',
-    ],
-  },
+  ...MARKETING_LEAD_SUBAGENTS.map(
+    ({ id, leadId, purpose, capabilities, model }): WorkerIdentity => ({
+      id,
+      leadId,
+      purpose,
+      capabilities,
+      model,
+    }),
+  ),
   {
     id: 'legal-contract-extractor',
     leadId: 'legal-lead',

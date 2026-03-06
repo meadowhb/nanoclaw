@@ -1,5 +1,6 @@
 import type { LeadSkillSet } from './types.js';
 import { PRODUCT_LEAD_OWNED_SKILLS } from './product-lead.js';
+import { MARKETING_LEAD_OWNED_SKILLS } from './marketing-lead.js';
 
 export const LEAD_SKILL_SETS: LeadSkillSet[] = [
   {
@@ -35,12 +36,7 @@ export const LEAD_SKILL_SETS: LeadSkillSet[] = [
   },
   {
     leadId: 'marketing-lead',
-    ownedSkills: [
-      'positioning-choice',
-      'channel-prioritization',
-      'message-consistency',
-      'campaign-go-no-go',
-    ],
+    ownedSkills: [...MARKETING_LEAD_OWNED_SKILLS],
   },
   {
     leadId: 'legal-lead',

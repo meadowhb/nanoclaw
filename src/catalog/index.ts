@@ -23,6 +23,10 @@ import {
   PRODUCT_LEAD_OWNED_SKILLS,
   PRODUCT_LEAD_SUBAGENTS,
 } from './product-lead.js';
+import {
+  MARKETING_LEAD_OWNED_SKILLS,
+  MARKETING_LEAD_SUBAGENTS,
+} from './marketing-lead.js';
 
 const workerIdentityById = new Map(
   WORKER_IDENTITIES.map((worker) => [worker.id, worker]),
@@ -115,6 +119,8 @@ export {
   compileWorkerToAgentSpec,
   PRODUCT_LEAD_OWNED_SKILLS,
   PRODUCT_LEAD_SUBAGENTS,
+  MARKETING_LEAD_OWNED_SKILLS,
+  MARKETING_LEAD_SUBAGENTS,
 };
 
 export type {

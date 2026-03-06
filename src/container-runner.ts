@@ -50,6 +50,7 @@ export interface ContainerInput {
   isScheduledTask?: boolean;
   assistantName?: string;
   secrets?: Record<string, string>;
+  runtimeToolsFile?: string;
 }
 
 export interface ContainerOutput {

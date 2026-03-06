@@ -5,6 +5,12 @@ import type {
   SessionRuntimeContext,
   SessionRuntimeResult,
 } from './session-runtime.js';
+import {
+  buildSerializedRuntimeTools,
+  runtimeToolsContainerPaths,
+  runtimeToolsHostPaths,
+  writeRuntimeToolsManifest,
+} from './runtime-tooling.js';
 
 export interface ContainerSessionRuntimeOptions {
   runContainerAgentFn?: typeof runContainerAgent;
@@ -49,6 +55,13 @@ export async function runContainerSession(
   const runContainerAgentFn = options.runContainerAgentFn ?? runContainerAgent;
   const prompt =
     options.promptBuilder?.(context) ?? buildContainerSessionPrompt(context);
+  const hostPaths = runtimeToolsHostPaths(context.instance);
+  const containerPaths = runtimeToolsContainerPaths();
+  writeRuntimeToolsManifest(hostPaths.manifestPath, {
+    workspaceDir: '/workspace/group',
+    eventsPath: containerPaths.eventsPath,
+    tools: buildSerializedRuntimeTools(context),
+  });
   const group: RegisteredGroup = {
     name: context.lead.leadId,
     folder: context.instance.bridgeGroupFolder,
@@ -64,6 +77,7 @@ export async function runContainerSession(
       groupFolder: context.instance.bridgeGroupFolder,
       chatJid: context.threadId,
       isMain: false,
+      runtimeToolsFile: containerPaths.manifestPath,
     },
     () => undefined,
   );

@@ -1,3 +1,4 @@
+import { InProcessSessionRuntime as ConcreteInProcessSessionRuntime } from './in-process-session-runtime.js';
 import { getSdkHooks } from './shared/sdk-hooks.js';
 import { ContainerSessionRuntime } from './container-session-runtime.js';
 import type {
@@ -6,28 +7,11 @@ import type {
   SessionRuntimeResult,
 } from './session-runtime.js';
 
-function unsupportedInProcessResult(
-  context: SessionRuntimeContext,
-): SessionRuntimeResult {
-  return {
-    response: {
-      schemaVersion: 1,
-      requestId: context.request.requestId,
-      status: 'error',
-      error: `No in-process runtime hook registered for ${context.lead.leadId}`,
-      durationMs: 0,
-      tokensUsed: { input: 0, output: 0 },
-    },
-    sessionId: context.sessionId,
-    resumeAt: context.resumeAt,
-  };
-}
-
 export class InProcessSessionRuntime implements SessionRuntime {
   async run(context: SessionRuntimeContext): Promise<SessionRuntimeResult> {
     const hooks = getSdkHooks();
     if (!hooks.runInProcessSession) {
-      return unsupportedInProcessResult(context);
+      return new ConcreteInProcessSessionRuntime().run(context);
     }
     return hooks.runInProcessSession(context);
   }

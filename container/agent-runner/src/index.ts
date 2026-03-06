@@ -28,6 +28,7 @@ interface ContainerInput {
   isScheduledTask?: boolean;
   assistantName?: string;
   secrets?: Record<string, string>;
+  runtimeToolsFile?: string;
 }
 
 interface ContainerOutput {
@@ -381,6 +382,7 @@ async function runQuery(
   prompt: string,
   sessionId: string | undefined,
   mcpServerPath: string,
+  runtimeToolsServerPath: string,
   containerInput: ContainerInput,
   sdkEnv: Record<string, string | undefined>,
   cachedContext: {
@@ -445,6 +447,17 @@ async function runQuery(
             NANOCLAW_IS_MAIN: containerInput.isMain ? '1' : '0',
           },
         },
+        ...(containerInput.runtimeToolsFile
+          ? {
+              orchestration_runtime: {
+                command: 'node',
+                args: [runtimeToolsServerPath],
+                env: {
+                  NANOCLAW_RUNTIME_TOOLS_FILE: containerInput.runtimeToolsFile,
+                },
+              },
+            }
+          : {}),
       },
       hooks: {
         PreCompact: [{ hooks: [createPreCompactHook(containerInput.assistantName)] }],
@@ -515,6 +528,10 @@ async function main(): Promise<void> {
 
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const mcpServerPath = path.join(__dirname, 'ipc-mcp-stdio.js');
+  const runtimeToolsServerPath = path.join(
+    __dirname,
+    'runtime-tools-mcp-stdio.js',
+  );
 
   let sessionId = containerInput.sessionId;
   fs.mkdirSync(IPC_INPUT_DIR, { recursive: true });
@@ -566,6 +583,7 @@ async function main(): Promise<void> {
         prompt,
         sessionId,
         mcpServerPath,
+        runtimeToolsServerPath,
         containerInput,
         sdkEnv,
         cachedContext,
