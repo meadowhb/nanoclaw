@@ -122,15 +122,16 @@ export class InProcessSessionRuntime implements SessionRuntime {
     this.queryFnPromise = options.queryFn
       ? Promise.resolve(options.queryFn)
       : loadQueryFn();
-    this.promptBuilder =
-      options.promptBuilder ?? buildInProcessSessionPrompt;
+    this.promptBuilder = options.promptBuilder ?? buildInProcessSessionPrompt;
     this.resolveRuntimeToolsServer =
       options.resolveRuntimeToolsServer ?? defaultResolveRuntimeToolsServer;
   }
 
   async run(context: SessionRuntimeContext): Promise<SessionRuntimeResult> {
     const startedAt = Date.now();
-    const { manifestPath, eventsPath } = runtimeToolsHostPaths(context.instance);
+    const { manifestPath, eventsPath } = runtimeToolsHostPaths(
+      context.instance,
+    );
     writeRuntimeToolsManifest(manifestPath, {
       workspaceDir: context.instance.workspaceDir,
       eventsPath,
@@ -171,7 +172,9 @@ export class InProcessSessionRuntime implements SessionRuntime {
         message.type === 'system' &&
         (message as { subtype?: string }).subtype === 'init'
       ) {
-        sessionId = asString((message as { session_id?: unknown }).session_id) ?? sessionId;
+        sessionId =
+          asString((message as { session_id?: unknown }).session_id) ??
+          sessionId;
       }
 
       if (message.type === 'assistant') {

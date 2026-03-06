@@ -63,10 +63,7 @@ export const MARKETING_LEAD_SUBAGENTS: SubagentSpec[] = [
       optional: ['keyword-strategy', 'distribution-notes'],
     },
     defaultSegments: ['pre-seed', 'seed'],
-    boundaries: [
-      'does-not-write-final-copy',
-      'does-not-approve-publication',
-    ],
+    boundaries: ['does-not-write-final-copy', 'does-not-approve-publication'],
   },
   {
     id: 'marketing-campaign-analyst',
@@ -83,7 +80,11 @@ export const MARKETING_LEAD_SUBAGENTS: SubagentSpec[] = [
     model: 'haiku',
     timeoutDefault: 120,
     sideEffects: 'none',
-    produces: ['performance-report', 'optimization-recommendations', 'roi-summary'],
+    produces: [
+      'performance-report',
+      'optimization-recommendations',
+      'roi-summary',
+    ],
     inputContract: {
       required: ['campaign-metrics'],
       optional: ['channel-breakdown', 'creative-variants', 'budget-allocation'],
@@ -93,10 +94,7 @@ export const MARKETING_LEAD_SUBAGENTS: SubagentSpec[] = [
       optional: ['channel-ranking', 'creative-winners', 'budget-reallocation'],
     },
     defaultSegments: ['seed'],
-    boundaries: [
-      'does-not-reallocate-budget',
-      'does-not-pause-campaigns',
-    ],
+    boundaries: ['does-not-reallocate-budget', 'does-not-pause-campaigns'],
   },
   {
     id: 'marketing-brand-editor',
@@ -149,7 +147,11 @@ export const MARKETING_LEAD_SUBAGENTS: SubagentSpec[] = [
       optional: ['brand-keywords', 'competitor-handles', 'sentiment-baseline'],
     },
     outputContract: {
-      required: ['mention-summary', 'sentiment-breakdown', 'recommended-responses'],
+      required: [
+        'mention-summary',
+        'sentiment-breakdown',
+        'recommended-responses',
+      ],
       optional: ['trend-signals', 'escalation-flags'],
     },
     defaultSegments: ['seed'],

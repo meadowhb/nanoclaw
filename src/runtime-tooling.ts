@@ -1,11 +1,7 @@
 import path from 'path';
 
-import type {
-  LeadInstance,
-} from './orchestration-types.js';
-import type {
-  SessionRuntimeContext,
-} from './session-runtime.js';
+import type { LeadInstance } from './orchestration-types.js';
+import type { SessionRuntimeContext } from './session-runtime.js';
 import { ensureDirectory, writeJsonIfChanged } from './state-provisioner.js';
 
 export interface SerializedRuntimeTool {

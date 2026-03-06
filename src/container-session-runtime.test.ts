@@ -9,10 +9,7 @@ import {
   buildContainerSessionPrompt,
   runContainerSession,
 } from './container-session-runtime.js';
-import type {
-  ContainerInput,
-  ContainerOutput,
-} from './container-runner.js';
+import type { ContainerInput, ContainerOutput } from './container-runner.js';
 import type { RegisteredGroup } from './types.js';
 import type { LeadBlueprint } from './orchestration-types.js';
 import type { SessionRuntimeContext } from './session-runtime.js';
@@ -120,7 +117,9 @@ describe('container-session-runtime', () => {
       isMain: false,
       runtimeToolsFile: '/workspace/group/.nanoclaw/runtime-tools.json',
     });
-    expect(calls[0]?.input.prompt).toContain('Objective: Patch the release blocker');
+    expect(calls[0]?.input.prompt).toContain(
+      'Objective: Patch the release blocker',
+    );
     expect(calls[0]?.input.prompt).toContain('"file": "README.md"');
     expect(calls[0]?.input.prompt).toContain('"reviewer": "approved"');
 
