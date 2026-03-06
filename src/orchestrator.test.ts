@@ -145,13 +145,13 @@ describe('orchestrator.handleToolCallEnvelope', () => {
     await expect(
       handleToolCallEnvelope({
         podId: 'pod-1',
-      envelope: malformed,
-      channelJid: 'team@chat',
-      sendMessage,
-      allowedToolCallers: new Set(['chief-of-staff']),
-      handlers: {
-        delegate_to_lead: async () => ({ ok: true }),
-        report_progress: async () => ({ sent: true }),
+        envelope: malformed,
+        channelJid: 'team@chat',
+        sendMessage,
+        allowedToolCallers: new Set(['chief-of-staff']),
+        handlers: {
+          delegate_to_lead: async () => ({ ok: true }),
+          report_progress: async () => ({ sent: true }),
           escalate_to_human: async () => ({ questionSent: true }),
         },
       }),
@@ -881,7 +881,9 @@ describe('orchestrator.runTeam lifecycle', () => {
     await vi.waitFor(() => {
       expect(sendWork).toHaveBeenCalledWith(
         'engineering-lead',
-        expect.objectContaining({ objective: 'Implement with hybrid executor' }),
+        expect.objectContaining({
+          objective: 'Implement with hybrid executor',
+        }),
         engineeringLead.channel,
       );
     });

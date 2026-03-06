@@ -150,10 +150,7 @@ function createDefaultRunTeamDeps(args: {
 
   return {
     pool: new WorkerPool({
-      maxConcurrentEngagements: Math.max(
-        1,
-        args.formation.leads.length + 1,
-      ),
+      maxConcurrentEngagements: Math.max(1, args.formation.leads.length + 1),
     }),
     db: null,
     dataDir: DATA_DIR,

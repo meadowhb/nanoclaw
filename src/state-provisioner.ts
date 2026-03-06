@@ -35,7 +35,9 @@ export function ensureManagedTextFile(
 
   const currentContent = fs.readFileSync(filePath, 'utf8');
   const currentHash = contentHash(currentContent);
-  const managedHash = hashExists ? fs.readFileSync(hashPath, 'utf8').trim() : '';
+  const managedHash = hashExists
+    ? fs.readFileSync(hashPath, 'utf8').trim()
+    : '';
 
   if (managedHash.length > 0 && currentHash !== managedHash) {
     throw new Error(`Managed file drift detected at ${filePath}`);

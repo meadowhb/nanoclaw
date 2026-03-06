@@ -23,7 +23,8 @@ function makeLead(
     defaultTimeout: 60,
     runtime: {
       executionMode,
-      allowedTools: executionMode === 'containerized' ? ['bash'] : ['report_progress'],
+      allowedTools:
+        executionMode === 'containerized' ? ['bash'] : ['report_progress'],
     },
   };
 }

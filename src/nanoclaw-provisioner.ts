@@ -3,10 +3,7 @@ import path from 'path';
 
 import { DATA_DIR, GROUPS_DIR } from './config.js';
 import { buildLeadInstance } from './lead-instances.js';
-import type {
-  LeadBlueprint,
-  LeadInstance,
-} from './orchestration-types.js';
+import type { LeadBlueprint, LeadInstance } from './orchestration-types.js';
 import {
   ensureDirectory,
   ensureManagedTextFile,
@@ -69,7 +66,8 @@ export class NanoclawProvisioner {
   constructor(options: NanoclawProvisionerOptions = {}) {
     this.dataDir = options.dataDir ?? DATA_DIR;
     this.groupsDir = options.groupsDir ?? GROUPS_DIR;
-    this.sessionsDir = options.sessionsDir ?? path.join(this.dataDir, 'sessions');
+    this.sessionsDir =
+      options.sessionsDir ?? path.join(this.dataDir, 'sessions');
     this.buildClaudeMd = options.buildClaudeMd ?? buildLeadClaudeMd;
   }
 
@@ -93,9 +91,15 @@ export class NanoclawProvisioner {
       path.join(this.groupsDir, instance.bridgeGroupFolder),
     );
 
-    const bridgeSessionDir = path.join(this.sessionsDir, instance.bridgeGroupFolder);
+    const bridgeSessionDir = path.join(
+      this.sessionsDir,
+      instance.bridgeGroupFolder,
+    );
     ensureDirectory(bridgeSessionDir);
-    ensureDirectoryLink(instance.claudeDir, path.join(bridgeSessionDir, '.claude'));
+    ensureDirectoryLink(
+      instance.claudeDir,
+      path.join(bridgeSessionDir, '.claude'),
+    );
 
     return instance;
   }

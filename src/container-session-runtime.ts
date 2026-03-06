@@ -1,8 +1,5 @@
 import type { RegisteredGroup } from './types.js';
-import {
-  runContainerAgent,
-  type ContainerOutput,
-} from './container-runner.js';
+import { runContainerAgent, type ContainerOutput } from './container-runner.js';
 import type {
   SessionRuntime,
   SessionRuntimeContext,

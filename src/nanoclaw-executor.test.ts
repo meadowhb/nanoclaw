@@ -4,10 +4,7 @@ import path from 'path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  _initTestDatabase,
-  getLeadConversationBinding,
-} from './db.js';
+import { _initTestDatabase, getLeadConversationBinding } from './db.js';
 import { createLeadRegistry } from './lead-registry.js';
 import { NanoclawExecutor } from './nanoclaw-executor.js';
 import { NanoclawProvisioner } from './nanoclaw-provisioner.js';
@@ -42,7 +39,9 @@ function makeLead(
   };
 }
 
-function makeRequest(overrides: Partial<SessionRuntimeContext['request']> = {}) {
+function makeRequest(
+  overrides: Partial<SessionRuntimeContext['request']> = {},
+) {
   return {
     schemaVersion: 1 as const,
     requestId: '11111111-1111-4111-8111-111111111111',
@@ -88,18 +87,17 @@ afterEach(() => {
 
 describe('nanoclaw-executor', () => {
   it('persists and resumes in-process conversations with the configured MCP tool surface', async () => {
-    const supportLead = makeLead(
-      'support-lead',
-      'support',
-      'in_process',
-      ['report_progress'],
-    );
+    const supportLead = makeLead('support-lead', 'support', 'in_process', [
+      'report_progress',
+    ]);
     const registry = createLeadRegistry([supportLead]);
     const inProcessRuntime: SessionRuntime = {
       run: vi
         .fn<SessionRuntime['run']>()
         .mockImplementationOnce(async (context) => {
-          const toolResult = await context.mcpTools[0]?.invoke({ step: 'first' });
+          const toolResult = await context.mcpTools[0]?.invoke({
+            step: 'first',
+          });
           return successResult(
             context,
             toolResult,
@@ -231,8 +229,7 @@ describe('nanoclaw-executor', () => {
     expect(
       vi
         .mocked(containerizedRuntime.run)
-        .mock.calls[0]?.[0]
-        .mcpTools.map((tool) => tool.name),
+        .mock.calls[0]?.[0].mcpTools.map((tool) => tool.name),
     ).toEqual(['bash', 'write_workspace']);
   });
 });

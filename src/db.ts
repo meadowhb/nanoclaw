@@ -624,7 +624,11 @@ export function upsertLeadConversationBinding(input: {
     now,
   );
 
-  return getLeadConversationBinding(input.leadId, input.channel, input.threadId)!;
+  return getLeadConversationBinding(
+    input.leadId,
+    input.channel,
+    input.threadId,
+  )!;
 }
 
 export function deleteLeadConversationBinding(

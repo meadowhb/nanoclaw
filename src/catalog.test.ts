@@ -204,11 +204,15 @@ describe('product lead subagents', () => {
 
 describe('validateWorkerReferences', () => {
   it('returns valid when worker list is empty', () => {
-    expect(validateWorkerReferences([], ['sales-lead'])).toEqual({ valid: true });
+    expect(validateWorkerReferences([], ['sales-lead'])).toEqual({
+      valid: true,
+    });
   });
 
   it('returns invalid when a worker ID is unknown', () => {
-    expect(validateWorkerReferences(['nonexistent-worker'], ['sales-lead'])).toEqual({
+    expect(
+      validateWorkerReferences(['nonexistent-worker'], ['sales-lead']),
+    ).toEqual({
       valid: false,
       unknown: ['nonexistent-worker'],
       disallowed: [],

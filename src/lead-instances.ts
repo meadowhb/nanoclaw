@@ -1,9 +1,6 @@
 import path from 'path';
 
-import type {
-  LeadBlueprint,
-  LeadInstance,
-} from './orchestration-types.js';
+import type { LeadBlueprint, LeadInstance } from './orchestration-types.js';
 
 export function sanitizeLeadInstanceSegment(leadId: string): string {
   return leadId.replace(/[^A-Za-z0-9_-]/g, '-');

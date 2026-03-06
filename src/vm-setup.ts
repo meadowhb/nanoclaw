@@ -49,9 +49,10 @@ export interface HealthResponse {
   error?: string;
 }
 
-export function handleConfigure(
-  body: unknown,
-): { status: number; body: Record<string, unknown> } {
+export function handleConfigure(body: unknown): {
+  status: number;
+  body: Record<string, unknown>;
+} {
   if (configured) {
     return { status: 409, body: { error: 'already_configured' } };
   }

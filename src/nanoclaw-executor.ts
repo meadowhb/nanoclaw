@@ -59,9 +59,7 @@ function defaultThreadIdResolver(
   return request.podId;
 }
 
-function defaultMcpToolFactory(
-  blueprint: LeadBlueprint,
-): SessionRuntimeTool[] {
+function defaultMcpToolFactory(blueprint: LeadBlueprint): SessionRuntimeTool[] {
   const names = blueprint.runtime?.allowedTools ?? [];
   return names.map((name) => ({
     name,
@@ -92,11 +90,11 @@ export class NanoclawExecutor implements WorkerExecutor {
     this.leadRegistry = options.leadRegistry;
     this.runtimeManager = options.runtimeManager ?? new RuntimeManager();
     this.provisioner =
-      options.provisioner ?? new NanoclawProvisioner({ dataDir: options.dataDir });
+      options.provisioner ??
+      new NanoclawProvisioner({ dataDir: options.dataDir });
     this.conversationStore =
       options.conversationStore ?? defaultConversationStore();
-    this.threadIdResolver =
-      options.threadIdResolver ?? defaultThreadIdResolver;
+    this.threadIdResolver = options.threadIdResolver ?? defaultThreadIdResolver;
     this.mcpToolFactory = options.mcpToolFactory ?? defaultMcpToolFactory;
   }
 

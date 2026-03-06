@@ -43,7 +43,8 @@ export class RuntimeManager {
   private readonly containerizedRuntime: SessionRuntime;
 
   constructor(options: RuntimeManagerOptions = {}) {
-    this.inProcessRuntime = options.inProcessRuntime ?? new InProcessSessionRuntime();
+    this.inProcessRuntime =
+      options.inProcessRuntime ?? new InProcessSessionRuntime();
     this.containerizedRuntime =
       options.containerizedRuntime ?? new ContainerSessionRuntime();
   }
