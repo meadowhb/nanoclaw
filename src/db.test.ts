@@ -3,15 +3,18 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   _initTestDatabase,
   createTask,
+  deleteLeadConversationBinding,
   deleteTask,
   getAllChats,
   getAllRegisteredGroups,
+  getLeadConversationBinding,
   getMessagesSince,
   getNewMessages,
   getTaskById,
   setRegisteredGroup,
   storeChatMetadata,
   storeMessage,
+  upsertLeadConversationBinding,
   updateTask,
 } from './db.js';
 
@@ -422,5 +425,47 @@ describe('registered group isMain', () => {
     const group = groups['group@g.us'];
     expect(group).toBeDefined();
     expect(group.isMain).toBeUndefined();
+  });
+});
+
+describe('lead conversation bindings', () => {
+  it('upserts and retrieves session continuity records', () => {
+    const first = upsertLeadConversationBinding({
+      leadId: 'support-lead',
+      channel: 'support@team',
+      threadId: 'pod-1',
+      sessionId: 'session-1',
+      resumeAt: 'resume-1',
+    });
+
+    expect(first).toMatchObject({
+      leadId: 'support-lead',
+      channel: 'support@team',
+      threadId: 'pod-1',
+      sessionId: 'session-1',
+      resumeAt: 'resume-1',
+    });
+
+    const second = upsertLeadConversationBinding({
+      leadId: 'support-lead',
+      channel: 'support@team',
+      threadId: 'pod-1',
+      sessionId: 'session-2',
+      resumeAt: 'resume-2',
+    });
+
+    expect(second.createdAt).toBe(first.createdAt);
+    expect(second.lastUsedAt >= first.lastUsedAt).toBe(true);
+    expect(
+      getLeadConversationBinding('support-lead', 'support@team', 'pod-1'),
+    ).toMatchObject({
+      sessionId: 'session-2',
+      resumeAt: 'resume-2',
+    });
+
+    deleteLeadConversationBinding('support-lead', 'support@team', 'pod-1');
+    expect(
+      getLeadConversationBinding('support-lead', 'support@team', 'pod-1'),
+    ).toBeUndefined();
   });
 });

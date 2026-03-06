@@ -56,6 +56,7 @@ export interface ContainerOutput {
   status: 'success' | 'error';
   result: string | null;
   newSessionId?: string;
+  resumeAt?: string;
   error?: string;
 }
 
@@ -334,6 +335,7 @@ export async function runContainerAgent(
       STREAM_PARSE_BUFFER_MAX,
     );
     let newSessionId: string | undefined;
+    let resumeAt: string | undefined;
     let outputChain = Promise.resolve();
 
     container.stdout.on('data', (data) => {
@@ -362,6 +364,9 @@ export async function runContainerAgent(
             const parsed: ContainerOutput = JSON.parse(jsonStr);
             if (parsed.newSessionId) {
               newSessionId = parsed.newSessionId;
+            }
+            if (parsed.resumeAt) {
+              resumeAt = parsed.resumeAt;
             }
             hadStreamingOutput = true;
             // Activity detected — reset the hard timeout
@@ -473,6 +478,7 @@ export async function runContainerAgent(
               status: 'success',
               result: null,
               newSessionId,
+              resumeAt,
             });
           });
           return;
@@ -581,6 +587,7 @@ export async function runContainerAgent(
             status: 'success',
             result: null,
             newSessionId,
+            resumeAt,
           });
         });
         return;
@@ -615,7 +622,10 @@ export async function runContainerAgent(
           'Container completed',
         );
 
-        resolve(output);
+        resolve({
+          ...output,
+          resumeAt: output.resumeAt ?? resumeAt,
+        });
       } catch (err) {
         logger.error(
           {

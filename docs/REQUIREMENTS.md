@@ -109,6 +109,23 @@ A personal Claude assistant accessible via WhatsApp, with minimal custom code.
 - Bash access is safe because commands run inside the container, not on the host
 - Browser automation via agent-browser with Chromium in the container
 
+### Metaclaw Formation Runtime Boundary
+- Metaclaw is the control plane and product layer. It owns tenant management, billing, provisioning, playbook catalog, and dispatch.
+- Customer workloads do not run in the Metaclaw process. Formation execution is dispatched to the customer's NanoClaw runtime.
+- NanoClaw owns the orchestration runtime for customer formations: lead coordination, SDK session management, and agent execution.
+- Metaclaw talks to NanoClaw over an authenticated VM API boundary rather than importing customer-runtime behavior into the control plane.
+
+### Lead Runtime Execution Model
+- NanoClaw's default execution model remains containerized for normal group conversations and scheduled tasks.
+- For Metaclaw-driven formations, long-lived functional leads and CoS sessions may run as in-process Claude Agent SDK sessions inside the customer's NanoClaw runtime instead of spawning a fresh container per lead invocation.
+- This is an explicit exception to the default per-invocation container model, made to reduce startup latency, container churn, and runtime overhead for multi-lead orchestration.
+- The tradeoff is reduced OS-level isolation for this formation path. Any use of in-process lead sessions must stay scoped to the customer NanoClaw runtime and must not move customer execution back into Metaclaw.
+- If we later need stronger isolation for formation leads, we can switch this path back to customer-side container spawning without changing the control-plane boundary.
+- Lead execution is selected per blueprint. `engineering-lead` stays containerized by default; the other built-in orchestration leads default to `in_process` with an explicit restricted tool allowlist.
+- Lead instances get stable host state under `data/leads/{leadId}/`, including a provisioned workspace, a `.claude/` state directory, and a managed `CLAUDE.md`. Managed memory files are hash-checked so we can detect drift before silently overwriting them.
+- Session continuity is explicit. NanoClaw persists `(lead_id, channel, thread_id) -> (session_id, resume_at)` bindings in SQLite so lead work can resume the right Claude session instead of starting from scratch on every delegated step.
+- The hybrid executor must preserve the existing channel-based fallback path. If no hybrid executor is supplied, `runTeam()` continues to use the legacy channel/Slack worker flow.
+
 ### Scheduled Tasks
 - Users can ask Claude to schedule recurring or one-time tasks from any group
 - Tasks run as full agents in the context of the group that created them

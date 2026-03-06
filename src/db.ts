@@ -73,6 +73,16 @@ function createSchema(database: Database.Database): void {
       group_folder TEXT PRIMARY KEY,
       session_id TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS lead_conversation_bindings (
+      lead_id TEXT NOT NULL,
+      channel TEXT NOT NULL,
+      thread_id TEXT NOT NULL,
+      session_id TEXT NOT NULL,
+      resume_at TEXT,
+      created_at TEXT NOT NULL,
+      last_used_at TEXT NOT NULL,
+      PRIMARY KEY (lead_id, channel, thread_id)
+    );
     CREATE TABLE IF NOT EXISTS registered_groups (
       jid TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -525,6 +535,107 @@ export function getAllSessions(): Record<string, string> {
     result[row.group_folder] = row.session_id;
   }
   return result;
+}
+
+export interface LeadConversationBindingRecord {
+  leadId: string;
+  channel: string;
+  threadId: string;
+  sessionId: string;
+  resumeAt: string | null;
+  createdAt: string;
+  lastUsedAt: string;
+}
+
+export function getLeadConversationBinding(
+  leadId: string,
+  channel: string,
+  threadId: string,
+): LeadConversationBindingRecord | undefined {
+  const row = db
+    .prepare(
+      `SELECT
+         lead_id,
+         channel,
+         thread_id,
+         session_id,
+         resume_at,
+         created_at,
+         last_used_at
+       FROM lead_conversation_bindings
+       WHERE lead_id = ? AND channel = ? AND thread_id = ?`,
+    )
+    .get(leadId, channel, threadId) as
+    | {
+        lead_id: string;
+        channel: string;
+        thread_id: string;
+        session_id: string;
+        resume_at: string | null;
+        created_at: string;
+        last_used_at: string;
+      }
+    | undefined;
+
+  if (!row) {
+    return undefined;
+  }
+
+  return {
+    leadId: row.lead_id,
+    channel: row.channel,
+    threadId: row.thread_id,
+    sessionId: row.session_id,
+    resumeAt: row.resume_at,
+    createdAt: row.created_at,
+    lastUsedAt: row.last_used_at,
+  };
+}
+
+export function upsertLeadConversationBinding(input: {
+  leadId: string;
+  channel: string;
+  threadId: string;
+  sessionId: string;
+  resumeAt?: string | null;
+}): LeadConversationBindingRecord {
+  const now = new Date().toISOString();
+  db.prepare(
+    `INSERT INTO lead_conversation_bindings (
+       lead_id,
+       channel,
+       thread_id,
+       session_id,
+       resume_at,
+       created_at,
+       last_used_at
+     ) VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(lead_id, channel, thread_id) DO UPDATE SET
+       session_id = excluded.session_id,
+       resume_at = excluded.resume_at,
+       last_used_at = excluded.last_used_at`,
+  ).run(
+    input.leadId,
+    input.channel,
+    input.threadId,
+    input.sessionId,
+    input.resumeAt ?? null,
+    now,
+    now,
+  );
+
+  return getLeadConversationBinding(input.leadId, input.channel, input.threadId)!;
+}
+
+export function deleteLeadConversationBinding(
+  leadId: string,
+  channel: string,
+  threadId: string,
+): void {
+  db.prepare(
+    `DELETE FROM lead_conversation_bindings
+     WHERE lead_id = ? AND channel = ? AND thread_id = ?`,
+  ).run(leadId, channel, threadId);
 }
 
 // --- Registered group accessors ---

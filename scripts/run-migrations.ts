@@ -7,8 +7,8 @@ import { compareSemver } from '../skills-engine/state.js';
 
 // Resolve tsx binary once to avoid npx race conditions across migrations
 function resolveTsx(): string {
-  // Check local node_modules first
-  const local = path.resolve('node_modules/.bin/tsx');
+  const scriptDir = path.dirname(process.argv[1] ?? '');
+  const local = path.resolve(scriptDir, '..', 'node_modules', '.bin', 'tsx');
   if (fs.existsSync(local)) return local;
   // Fall back to whichever tsx is in PATH
   try {

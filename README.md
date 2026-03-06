@@ -62,6 +62,7 @@ Then run `/setup`. Claude Code handles everything: dependencies, authentication,
 - **Web access** - Search and fetch content from the Web
 - **Container isolation** - Agents are sandboxed in Apple Container (macOS) or Docker (macOS/Linux)
 - **Agent Swarms** - Spin up teams of specialized agents that collaborate on complex tasks. NanoClaw is the first personal AI assistant to support agent swarms.
+- **Hybrid formation runtime** - Metaclaw-driven formations can keep long-lived lead sessions warm inside the customer's NanoClaw runtime while still using containerized execution where it matters.
 - **Optional integrations** - Add Gmail (`/add-gmail`) and more via skills
 
 ## Usage
@@ -126,6 +127,13 @@ Channels --> SQLite --> Polling loop --> Container (Claude Agent SDK) --> Respon
 ```
 
 Single Node.js process. Channels are added via skills and self-register at startup — the orchestrator connects whichever ones have credentials present. Agents execute in isolated Linux containers with filesystem isolation. Only mounted directories are accessible. Per-group message queue with concurrency control. IPC via filesystem.
+
+Formation execution now uses a two-tier model inside NanoClaw:
+- Standard group chats and scheduled tasks stay on the default containerized path.
+- Metaclaw-driven lead formations can run through a hybrid executor that assigns stable lead workspaces under `data/leads/`, persists `sessionId` / `resumeAt` continuity in SQLite, and selects either an in-process lead runtime or a containerized runtime per lead blueprint.
+- Engineering defaults to the containerized runtime. Other built-in orchestration leads default to the in-process runtime with an explicit restricted tool surface.
+
+Continuity is a first-class contract for formation leads. NanoClaw stores lead conversation bindings keyed by lead, channel, and thread so resumed work picks up the right Claude session instead of starting cold every time. In-process lead sessions trade away OS-level isolation for lower latency, so they remain scoped to the customer's NanoClaw runtime and use an explicit allowlist of tools.
 
 For the full architecture details, see [docs/SPEC.md](docs/SPEC.md).
 

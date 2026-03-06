@@ -4,6 +4,101 @@
   "description": "Personal Claude assistant. Lightweight, secure, customizable.",
   "type": "module",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./index": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./aggregation": {
+      "types": "./dist/aggregation.d.ts",
+      "import": "./dist/aggregation.js"
+    },
+    "./catalog": {
+      "types": "./dist/catalog/index.d.ts",
+      "import": "./dist/catalog/index.js"
+    },
+    "./channel-executor": {
+      "types": "./dist/channel-executor.d.ts",
+      "import": "./dist/channel-executor.js"
+    },
+    "./channel-protocol": {
+      "types": "./dist/channel-protocol.d.ts",
+      "import": "./dist/channel-protocol.js"
+    },
+    "./concurrency": {
+      "types": "./dist/concurrency.d.ts",
+      "import": "./dist/concurrency.js"
+    },
+    "./container-session-runtime": {
+      "types": "./dist/container-session-runtime.d.ts",
+      "import": "./dist/container-session-runtime.js"
+    },
+    "./db": {
+      "types": "./dist/db.d.ts",
+      "import": "./dist/db.js"
+    },
+    "./env": {
+      "types": "./dist/env.d.ts",
+      "import": "./dist/env.js"
+    },
+    "./group-folder": {
+      "types": "./dist/group-folder.d.ts",
+      "import": "./dist/group-folder.js"
+    },
+    "./lead-instances": {
+      "types": "./dist/lead-instances.d.ts",
+      "import": "./dist/lead-instances.js"
+    },
+    "./lead-registry": {
+      "types": "./dist/lead-registry.d.ts",
+      "import": "./dist/lead-registry.js"
+    },
+    "./logger": {
+      "types": "./dist/logger.d.ts",
+      "import": "./dist/logger.js"
+    },
+    "./nanoclaw-executor": {
+      "types": "./dist/nanoclaw-executor.d.ts",
+      "import": "./dist/nanoclaw-executor.js"
+    },
+    "./nanoclaw-provisioner": {
+      "types": "./dist/nanoclaw-provisioner.d.ts",
+      "import": "./dist/nanoclaw-provisioner.js"
+    },
+    "./orchestration-types": {
+      "types": "./dist/orchestration-types.d.ts",
+      "import": "./dist/orchestration-types.js"
+    },
+    "./orchestrator": {
+      "types": "./dist/orchestrator.d.ts",
+      "import": "./dist/orchestrator.js"
+    },
+    "./runtime-manager": {
+      "types": "./dist/runtime-manager.d.ts",
+      "import": "./dist/runtime-manager.js"
+    },
+    "./router": {
+      "types": "./dist/router.d.ts",
+      "import": "./dist/router.js"
+    },
+    "./session-runtime": {
+      "types": "./dist/session-runtime.d.ts",
+      "import": "./dist/session-runtime.js"
+    },
+    "./shared/sdk-hooks": {
+      "types": "./dist/shared/sdk-hooks.d.ts",
+      "import": "./dist/shared/sdk-hooks.js"
+    },
+    "./state-provisioner": {
+      "types": "./dist/state-provisioner.d.ts",
+      "import": "./dist/state-provisioner.js"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",

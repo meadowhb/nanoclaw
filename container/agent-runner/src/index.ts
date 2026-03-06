@@ -34,6 +34,7 @@ interface ContainerOutput {
   status: 'success' | 'error';
   result: string | null;
   newSessionId?: string;
+  resumeAt?: string;
   error?: string;
 }
 
@@ -476,7 +477,8 @@ async function runQuery(
       writeOutput({
         status: 'success',
         result: textResult || null,
-        newSessionId
+        newSessionId,
+        resumeAt: lastAssistantUuid,
       });
     }
   }
@@ -585,7 +587,12 @@ async function main(): Promise<void> {
       }
 
       // Emit session update so host can track it
-      writeOutput({ status: 'success', result: null, newSessionId: sessionId });
+      writeOutput({
+        status: 'success',
+        result: null,
+        newSessionId: sessionId,
+        resumeAt,
+      });
 
       log('Query ended, waiting for next IPC message...');
 
@@ -606,6 +613,7 @@ async function main(): Promise<void> {
       status: 'error',
       result: null,
       newSessionId: sessionId,
+      resumeAt,
       error: errorMessage
     });
     process.exit(1);

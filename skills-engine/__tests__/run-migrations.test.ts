@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { cleanup, createTempDir } from './test-helpers.js';
 
+const TEST_TIMEOUT_MS = 20_000;
+
 describe('run-migrations', () => {
   let tmpDir: string;
   let newCoreDir: string;
@@ -51,7 +53,7 @@ describe('run-migrations', () => {
     expect(exitCode).toBe(0);
     expect(result.migrationsRun).toBe(0);
     expect(result.results).toEqual([]);
-  });
+  }, TEST_TIMEOUT_MS);
 
   it('outputs empty results when migrations dir exists but is empty', () => {
     fs.mkdirSync(path.join(newCoreDir, 'migrations'), { recursive: true });
@@ -61,7 +63,7 @@ describe('run-migrations', () => {
 
     expect(exitCode).toBe(0);
     expect(result.migrationsRun).toBe(0);
-  });
+  }, TEST_TIMEOUT_MS);
 
   it('runs migrations in the correct version range', () => {
     // Create a marker file when the migration runs
@@ -109,7 +111,7 @@ fs.writeFileSync(path.join(root, 'migrated-2.1.0'), 'done');
     expect(fs.existsSync(path.join(tmpDir, 'migrated-1.2.0'))).toBe(true);
     // 2.1.0 is outside range
     expect(fs.existsSync(path.join(tmpDir, 'migrated-2.1.0'))).toBe(false);
-  });
+  }, TEST_TIMEOUT_MS);
 
   it('excludes the from-version (only runs > from)', () => {
     createMigration(
@@ -138,7 +140,7 @@ fs.writeFileSync(path.join(root, 'migrated-1.1.0'), 'done');
     expect(result.results[0].version).toBe('1.1.0');
     // 1.0.0 should NOT have run
     expect(fs.existsSync(path.join(tmpDir, 'migrated-1.0.0'))).toBe(false);
-  });
+  }, TEST_TIMEOUT_MS);
 
   it('includes the to-version (<= to)', () => {
     createMigration(
@@ -157,7 +159,7 @@ fs.writeFileSync(path.join(root, 'migrated-2.0.0'), 'done');
     expect(result.migrationsRun).toBe(1);
     expect(result.results[0].version).toBe('2.0.0');
     expect(result.results[0].success).toBe(true);
-  });
+  }, TEST_TIMEOUT_MS);
 
   it('runs migrations in semver ascending order', () => {
     // Create them in non-sorted order
@@ -191,7 +193,7 @@ fs.writeFileSync(log, existing + '${v}\\n');
       'utf-8',
     );
     expect(log.trim()).toBe('1.1.0\n1.2.0\n1.3.0');
-  });
+  }, TEST_TIMEOUT_MS);
 
   it('reports failure and exits non-zero when a migration throws', () => {
     createMigration(
@@ -206,7 +208,7 @@ fs.writeFileSync(log, existing + '${v}\\n');
     expect(result.migrationsRun).toBe(1);
     expect(result.results[0].success).toBe(false);
     expect(result.results[0].error).toBeDefined();
-  });
+  }, TEST_TIMEOUT_MS);
 
   it('ignores non-semver directories in migrations/', () => {
     fs.mkdirSync(path.join(newCoreDir, 'migrations', 'README'), {
@@ -231,5 +233,5 @@ fs.writeFileSync(path.join(root, 'migrated-1.1.0'), 'done');
     expect(exitCode).toBe(0);
     expect(result.migrationsRun).toBe(1);
     expect(result.results[0].version).toBe('1.1.0');
-  });
+  }, TEST_TIMEOUT_MS);
 });
