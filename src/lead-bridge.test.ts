@@ -65,14 +65,14 @@ describe('lead bridge', () => {
 
     const registered = getRegisteredGroup('slack-thread:T123:C-SALES:111.222');
     expect(registered?.folder).toBe('slk_sales_111_222');
-    expect(getGatewayThread('slack-thread:T123:C-SALES:111.222')).toMatchObject({
-      lead_id: 'sales-lead',
-      channel_jid: 'slack:T123:C-SALES',
-      root_thread_ts: '111.222',
-    });
-    expect(
-      fs.existsSync(path.join(generatedGroupDir, 'CLAUDE.md')),
-    ).toBe(true);
+    expect(getGatewayThread('slack-thread:T123:C-SALES:111.222')).toMatchObject(
+      {
+        lead_id: 'sales-lead',
+        channel_jid: 'slack:T123:C-SALES',
+        root_thread_ts: '111.222',
+      },
+    );
+    expect(fs.existsSync(path.join(generatedGroupDir, 'CLAUDE.md'))).toBe(true);
 
     const queued = enqueueLeadBridgeOutbound(
       'slack-thread:T123:C-SALES:111.222',

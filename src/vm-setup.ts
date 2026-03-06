@@ -138,7 +138,12 @@ export function handleConfigure(body: unknown) {
 
 export async function handleHealth() {
   if (!configured) {
-    return { status: 'warm', chatConnected: false, registeredGroups: 0, uptime: 0 };
+    return {
+      status: 'warm',
+      chatConnected: false,
+      registeredGroups: 0,
+      uptime: 0,
+    };
   }
 
   let serviceState: string;
@@ -275,7 +280,10 @@ export function startServer() {
           });
           return;
         }
-        sendJson(200, ackLeadBridgeOutbound(parsed.data.leaseId, parsed.data.messageId));
+        sendJson(
+          200,
+          ackLeadBridgeOutbound(parsed.data.leaseId, parsed.data.messageId),
+        );
         return;
       }
     } catch (error) {

@@ -117,7 +117,10 @@ function sanitizeThreadSegment(value: string): string {
   return value.replace(/[^a-zA-Z0-9_-]/g, '_');
 }
 
-function buildThreadFolder(lead: LeadBridgeLeadConfig, rootThreadTs: string): string {
+function buildThreadFolder(
+  lead: LeadBridgeLeadConfig,
+  rootThreadTs: string,
+): string {
   const folder = `slk_${lead.folderSlug}_${sanitizeThreadSegment(rootThreadTs)}`;
   if (!isValidGroupFolder(folder)) {
     throw new Error(`Invalid thread folder generated for ${lead.leadId}`);
@@ -156,9 +159,9 @@ function getLeadConfigByChannelJid(
   return null;
 }
 
-export function bootstrapLeadBridge(
-  request: LeadBridgeBootstrapRequest,
-): { ok: true } {
+export function bootstrapLeadBridge(request: LeadBridgeBootstrapRequest): {
+  ok: true;
+} {
   ensureLeadBridgeDirs();
   const config = readLeadBridgeConfig();
   config.workspaces[request.workspaceId] = {
@@ -173,9 +176,9 @@ export function bootstrapLeadBridge(
   return { ok: true };
 }
 
-export function ingestLeadBridgeInbound(
-  request: LeadBridgeInboundRequest,
-): { ok: true } {
+export function ingestLeadBridgeInbound(request: LeadBridgeInboundRequest): {
+  ok: true;
+} {
   ensureLeadBridgeDirs();
   const matched = getLeadConfigByChannelJid(request.channelJid);
   if (!matched || matched.lead.leadId !== request.leadId) {
@@ -195,7 +198,10 @@ export function ingestLeadBridgeInbound(
     if (fs.existsSync(templatePath)) {
       fs.copyFileSync(templatePath, path.join(groupDir, 'CLAUDE.md'));
     } else {
-      fs.writeFileSync(path.join(groupDir, 'CLAUDE.md'), buildLeadTemplateMarkdown(lead));
+      fs.writeFileSync(
+        path.join(groupDir, 'CLAUDE.md'),
+        buildLeadTemplateMarkdown(lead),
+      );
     }
     setRegisteredGroup(request.threadJid, {
       name: `${request.leadId} Slack Thread`,
@@ -277,9 +283,7 @@ function recoverExpiredLeases(nowMs: number): void {
   }
 }
 
-export function claimLeadBridgeOutbound(
-  limit: number = 10,
-): {
+export function claimLeadBridgeOutbound(limit: number = 10): {
   messages: Array<LeadBridgeOutboundMessage & { leaseId: string }>;
 } {
   ensureLeadBridgeDirs();
@@ -315,7 +319,10 @@ export function ackLeadBridgeOutbound(
   messageId: string,
 ): { ok: true } {
   ensureLeadBridgeDirs();
-  const leasedPath = path.join(OUTBOX_LEASED_DIR, `${leaseId}__${messageId}.json`);
+  const leasedPath = path.join(
+    OUTBOX_LEASED_DIR,
+    `${leaseId}__${messageId}.json`,
+  );
   if (fs.existsSync(leasedPath)) {
     fs.unlinkSync(leasedPath);
   }
